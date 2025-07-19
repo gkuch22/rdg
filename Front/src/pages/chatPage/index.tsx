@@ -256,7 +256,13 @@ const scrollToBottom = () => {
       </div>
 
       {/* Messages */}
-      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[200px] pt-[90px] min-h-screen w-full">
+      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6  mt-[75px] w-full"
+       style={{
+          height: `${viewportHeight - 72 - 128}px`, // Fixed height based on available viewport
+          overflowY: 'auto',
+          paddingBottom: '20px'
+        }}
+      >
         {messages.map((message) => (
           <div
             key={message.id}
@@ -323,11 +329,11 @@ const scrollToBottom = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input area - Fixed above keyboard */}
+      {/* Input area - Always fixed above keyboard */}
       <div 
         className="max-w-[1200px] m-auto border-t border-border bg-background px-6 py-4 fixed left-0 right-0 z-20"
         style={{
-          bottom: `${window.innerHeight - viewportHeight}px`
+          bottom: Math.max(0, window.innerHeight - viewportHeight) + 'px'
         }}
       >
         {/* Attachments preview */}
@@ -412,7 +418,7 @@ const scrollToBottom = () => {
         </div>
       </div>
     </div>
-  );
+      );
 };
 
 export default ChatInterface;
