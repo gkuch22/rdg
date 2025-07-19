@@ -35,20 +35,20 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
       timestamp: new Date(Date.now() - 60000),
       status: 'read'
     },
-    {
-      id: '2',
-      content: 'I need help with analyzing this document.',
-      sender: 'user',
-      timestamp: new Date(Date.now() - 30000),
-      status: 'read'
-    },
-    {
-      id: '3',
-      content: 'I\'d be happy to help you analyze your document. Please upload the file and I\'ll take a look at it.',
-      sender: 'bot',
-      timestamp: new Date(Date.now() - 15000),
-      status: 'read'
-    }
+    // {
+    //   id: '2',
+    //   content: 'I need help with analyzing this document.',
+    //   sender: 'user',
+    //   timestamp: new Date(Date.now() - 30000),
+    //   status: 'read'
+    // },
+    // {
+    //   id: '3',
+    //   content: 'I\'d be happy to help you analyze your document. Please upload the file and I\'ll take a look at it.',
+    //   sender: 'bot',
+    //   timestamp: new Date(Date.now() - 15000),
+    //   status: 'read'
+    // }
   ]);
 
 
@@ -68,9 +68,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+const scrollToBottom = () => {
+  setTimeout(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center' // Changed from default 'start'
+    });
+  }, 0);
+};
   
 
   useEffect(() => {
@@ -219,7 +224,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
       
       {/* Header */}
       <div className="fixed w-full max-w-[1200px] top-0 right-1/2 translate-x-1/2 z-10 border-b border-border px-6 py-4 bg-background">
-        <Link to={"/"} className="flex group items-center max-sm:justify-center gap-3">
+        <Link to={"/"} className="flex w-fit group items-center max-sm:justify-center gap-3">
           <div className="w-10 h-10 group-hover:rotate-360 duration-300 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium">
             <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#000000">
               <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
@@ -244,7 +249,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
       </div>
 
       {/* Messages */}
-      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-32 mt-[73px] min-h-screen w-full">
+      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[200px] pt-[80px] min-h-screen w-full">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -255,11 +260,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
            
 
             {/* Message content */}
-            <div className={`max-w-xs lg:max-w-md ${message.sender === 'user' ? 'text-right' : ''}`}>
+            <div className={`max-w-xs flex flex-col lg:max-w-md ${message.sender === 'user' ? 'text-right items-end' : 'items-start'}`}>
               
               {/* Attachments */}
               {message.attachments && message.attachments.length > 0 && (
-  <div className="mb-2 space-y-2">
+  <div className="mb-2 space-y-2 w-full max-w-fit">
     {message.attachments.map((attachment) => (
       <a 
         key={attachment.id} 
@@ -287,7 +292,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
               {/* Text message */}
               {message.content && (
                 <div
-                  className={`p-3 min-w-[57px] flex justify-center rounded-[10px] ${message.sender === 'user' ? "bg-main text-white" : "bg-other" }`}
+                  className={`p-3 min-w-[57px] w-fit flex justify-center rounded-[10px] ${message.sender === 'user' ? "bg-main text-white" : "bg-other" }`}
                 
                 >
                   <div>
