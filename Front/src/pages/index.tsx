@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send, Paperclip, FileText, Image, X, Check, Clock } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 
 interface Message {
   id: string;
@@ -21,7 +22,10 @@ interface ChatInterfaceProps {
   className?: string;
 }
 
+
+
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -45,6 +49,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
       status: 'read'
     }
   ]);
+
+
+
+
   
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -62,6 +70,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+  
 
   useEffect(() => {
     scrollToBottom();
@@ -183,7 +192,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
       case 'delivered':
         return <div className="flex"><Check className="w-3 h-3 text-muted-foreground" /><Check className="w-3 h-3 text-muted-foreground -ml-1" /></div>;
       case 'read':
-        return <div className="flex text-blue-500"><Check className="w-3 h-3" /><Check className="w-3 h-3 -ml-1" /></div>;
+        return <div className="flex text-[rgb(40,32,32)]"><Check className="w-3 h-3" /><Check className="w-3 h-3 -ml-1" /></div>;
       default:
         return null;
     }
@@ -205,22 +214,36 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
   );
 
   return (
-    <div className={`min-h-screen ${className}`} style={{ backgroundColor: 'hsl(var(--chat-background))' }}>
+    <div className={`${className}`} style={{ backgroundColor: 'hsl(var(--chat-background))' }}>
+      
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-border bg-background px-6 py-4">
-        <div className="flex items-center gap-3">
+      <div className="sticky top-0 z-10 border-b border-border px-6 py-4 bg-background border-b-[rgb(235,235,235)]">
+        <div className="flex items-center max-sm:justify-center gap-3">
           <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium">
-            AI
+            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#000000">
+              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+              <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+              <g id="SVGRepo_iconCarrier">
+                <path style={{ fill: "#AEADB3" }} d="M425.347,468.992c-2.692,0-5.415-0.544-8.001-1.675c-17.573-7.7-81.137-32.815-161.348-32.815 s-143.772,25.117-161.344,32.814c-8.728,3.823-19.019,0.927-24.47-6.881c-5.453-7.809-4.623-18.466,1.968-25.341 C186.457,315.937,237.211,92.289,237.211,27.393h37.579c0,64.896,50.753,288.544,165.057,407.7 c6.594,6.876,7.422,17.533,1.969,25.342C437.978,465.931,431.746,468.992,425.347,468.992z M256,396.922 c45.128,0,85.512,7.323,116.679,15.573c-43.826-61.302-73.867-132.096-92.604-185.955c-9.769-28.08-17.756-55.189-24.076-80.274 c-6.32,25.085-14.306,52.194-24.076,80.274c-18.737,53.859-48.775,124.654-92.604,185.955 C170.489,404.247,210.872,396.922,256,396.922z"></path>
+                <path style={{ fill: "#56545A" }} d="M439.847,435.093C325.543,315.937,274.79,92.289,274.79,27.393H256v118.872l0,0 c6.32,25.085,14.306,52.194,24.076,80.274c18.737,53.859,48.777,124.654,92.604,185.955c-31.168-8.25-71.551-15.573-116.679-15.573 l0,0V434.5l0,0c80.209,0,143.773,25.117,161.348,32.815c2.584,1.131,5.307,1.675,8.001,1.675c6.397,0,12.63-3.061,16.469-8.557 C447.267,452.626,446.439,441.969,439.847,435.093z"></path>
+                <rect x="237.213" y="27.393" style={{ fill: "#88888F" }} width="37.579" height="457.214"></rect>
+                <path style={{ fill: "#FF4F19" }} d="M510.695,132.83c-5.431-20.27-26.265-32.299-46.536-26.868l-26.215,7.024l-7.025-26.215 c-5.431-20.27-26.267-32.299-46.536-26.868c-20.27,5.431-32.299,26.267-26.868,46.536l26.693,99.619l99.619-26.693 C504.099,173.935,516.126,153.099,510.695,132.83z"></path>
+                <g>
+                  <path style={{ fill: "#AF2E08" }} d="M510.696,132.83c-5.431-20.27-26.267-32.299-46.536-26.868l-26.215,7.025l-53.735,93.071 l99.619-26.693C504.099,173.935,516.128,153.099,510.696,132.83z"></path>
+                  <path style={{ fill: "#AF2E08" }} d="M127.617,59.904c-20.27-5.431-41.104,6.598-46.536,26.868l-7.025,26.215l8.478,54.1l45.258,38.971 l26.693-99.619C159.916,86.169,147.887,65.336,127.617,59.904z"></path>
+                </g>
+                <path style={{ fill: "#FF4F19" }} d="M1.304,132.83c5.431-20.27,26.267-32.299,46.536-26.868l26.215,7.025l53.735,93.071l-99.618-26.693 C7.902,173.935-4.127,153.099,1.304,132.83z"></path>
+              </g>
+            </svg>
           </div>
           <div>
-            <h1 className="font-medium text-foreground">Chat Assistant</h1>
-            <p className="text-sm text-muted-foreground">Online</p>
+            <h1 className="font-medium text-xl text-foreground">Guidee</h1>
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="px-6 py-4 space-y-4 pb-32">
+      <div className="sm:px-6 py-4 space-y-4 pb-32 mt-10 min-h-screen">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -229,20 +252,21 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
             }`}
           >
             {/* Avatar */}
-            <div 
+             {/* <div 
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
                 message.sender === 'user' ? '' : 'bg-muted text-muted-foreground'
               }`}
               style={message.sender === 'user' ? {
-                backgroundColor: 'hsl(var(--chat-user-bubble))',
+                backgroundColor: 'rgb(220,220,220)',
                 color: 'hsl(var(--chat-user-text))'
               } : {}}
             >
               {message.sender === 'user' ? 'You' : 'AI'}
-            </div>
+            </div> */}
 
             {/* Message content */}
             <div className={`max-w-xs lg:max-w-md ${message.sender === 'user' ? 'text-right' : ''}`}>
+              
               {/* Attachments */}
               {message.attachments && message.attachments.length > 0 && (
                 <div className="mb-2 space-y-2">
@@ -270,17 +294,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
               {/* Text message */}
               {message.content && (
                 <div
-                  className="p-3 rounded-[10px]"
-                  style={{
-                    backgroundColor: message.sender === 'user' 
-                      ? 'hsl(var(--chat-user-bubble))' 
-                      : 'hsl(var(--chat-bot-bubble))',
-                    color: message.sender === 'user' 
-                      ? 'hsl(var(--chat-user-text))' 
-                      : 'hsl(var(--chat-bot-text))'
-                  }}
+                  className={`p-3 flex justify-center rounded-[10px] ${message.sender === 'user' ? "bg-[rgb(40,32,32)] text-white" : "bg-[rgb(235,235,235)]" }`}
+                
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <div>
+                  <p className="text-sm text-start whitespace-pre-wrap">{message.content}</p>
+                  </div>
                 </div>
               )}
 
@@ -325,39 +344,54 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
             ))}
           </div>
         )}
-
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        
+        <form onSubmit={handleSubmit} className="flex max-sm:flex-col items-center gap-2">
           <div className="w-full flex relative">
-            <textarea
+            <Textarea
               ref={textareaRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type a message..."
-              className="w-full resize-none border h-fit rounded-[10px] px-4 py-3 pr-12 text-sm focus:outline-none transition-colors"
-              rows={1}
+              className="w-full sm:h-24 resize-none h-fit rounded-[6px] px-4 py-3 pr-12 text-sm focus:outline-none transition-colors border-[rgb(200,200,200)] border-1"
               style={{
-                minHeight: '44px',
-                maxHeight: '120px',
-                backgroundColor: 'hsl(var(--chat-input-background))',
-                borderColor: 'hsl(var(--chat-input-border))'
+               scrollbarWidth: "thin",
+                scrollbarColor: "rgba(156, 163, 175) transparent",
               }}
-              onFocus={(e) => {
-                e.target.style.borderColor = 'hsl(var(--chat-input-focus))';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = 'hsl(var(--chat-input-border))';
-              }}
+              // style={{
+              //   minHeight: '44px',
+              //   maxHeight: '120px',
+              //   backgroundColor: 'hsl(var(--chat-input-background))',
+              //   borderColor: 'hsl(var(--chat-input-border))'
+              // }}
+              // onFocus={(e) => {
+              //   e.target.style.borderColor = 'hsl(var(--chat-input-focus))';
+              // }}
+              // onBlur={(e) => {
+              //   e.target.style.borderColor = 'hsl(var(--chat-input-border))';
+              // }}
             />
             
-            {/* File upload button */}
-            <button
+          
+          
+          </div>
+<div className='flex max-sm:w-full justify-start sm:flex-col gap-2'>
+
+    <Button
+            type="submit"
+            className="h-11 w-11 rounded-[10px] group hover:cursor-pointer"
+            disabled={!inputValue.trim() && attachments.length === 0}
+          >
+            <Send className="w-5 h-5 group-hover:scale-120 duration-200" />
+          </Button>
+          <div>
+              <Button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="absolute hover:cursor-pointer right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              className="flex h-11 w-11 rounded-[10px] group text-[rgb(40,32,32)] justify-center bg-[rgb(235,235,235)] items-center hover:cursor-pointer hover:bg-[rgb(210,210,210)] transition-colors"
             >
-              <Paperclip className="w-5 h-5" />
-            </button>
+              <Paperclip className="w-5 h-5 group-hover:scale-120 duration-200" />
+            </Button>
             
             <input
               ref={fileInputRef}
@@ -368,15 +402,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
               className="hidden"
             />
           </div>
-          
-          <Button
-            type="submit"
-            size="sm"
-            className="h-11 w-11 rounded-[10px]"
-            disabled={!inputValue.trim() && attachments.length === 0}
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+          </div>
         </form>
       </div>
     </div>
