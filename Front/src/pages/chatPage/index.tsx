@@ -57,21 +57,22 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Handle viewport changes for mobile keyboard
-  useEffect(() => {
-    const handleViewportChange = () => {
-      if (window.visualViewport) {
-        setViewportHeight(window.visualViewport.height);
-      }
-    };
+ // Replace your current viewport height useEffect with this:
+useEffect(() => {
+  const handleResize = () => {
+    // Use window.innerHeight instead of visualViewport for more stability
+    setViewportHeight(window.innerHeight);
+  };
 
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleViewportChange);
-      return () => {
-        window.visualViewport?.removeEventListener('resize', handleViewportChange);
-      };
-    }
-  }, []);
+  // Add both resize and orientationchange listeners
+  window.addEventListener('resize', handleResize);
+  window.addEventListener('orientationchange', handleResize);
+
+  return () => {
+    window.removeEventListener('resize', handleResize);
+    window.removeEventListener('orientationchange', handleResize);
+  };
+}, []);
 
 const scrollToBottom = () => {
   setTimeout(() => {
@@ -256,7 +257,7 @@ const scrollToBottom = () => {
       </div>
 
       {/* Messages */}
-      <div className={`px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 sm:pb-[200px] pt-[90px] w-full h-[${viewportHeight - 90 - 150}px] max-sm:overflow-y-auto sm:min-h-screen`}
+      <div className={`px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[150px] sm:pb-[200px] pt-[90px] w-full  max-sm:overflow-y-auto sm:min-h-screen`}
       // style={{
       //     height: `${viewportHeight - 90 - 150}px`, // Fixed height based on available viewport
       //     overflowY: 'auto',
@@ -329,13 +330,11 @@ const scrollToBottom = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input area - Fixed above keyboard */}
-      <div 
-        className="max-w-[1200px] m-auto border-t border-border bg-background px-6 py-4 fixed left-0 right-0 z-20"
-        style={{
-          bottom: `${window.innerHeight - viewportHeight}px`
-        }}
-      >
+      
+      {/* Replace your current input area div with this: */}
+<div 
+  className="max-w-[1200px] m-auto border-t border-border bg-background px-6 py-4 fixed left-0 right-0 bottom-0 z-20"
+>
         {/* Attachments preview */}
         {attachments.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
