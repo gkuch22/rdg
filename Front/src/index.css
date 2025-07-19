@@ -1,12 +1,35 @@
+/* @import url('https://fonts.googleapis.com/css2?family=Nova+Oval&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-@layer utilities {
+
+
+
+@layer base{
   *{
     box-sizing: border-box;
   }
+}
+
+@layer utilities {
+
+  .nova-oval-regular {
+  font-family: "Nova Oval", system-ui;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.luckiest-guy-regular {
+  font-family: "Luckiest Guy", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
 
   .customScrollbar::-webkit-scrollbar {
     width: 4px;
@@ -28,7 +51,12 @@
 
 
 
+
+
 @theme inline {
+  --color-main: black;
+  --color-other:rgb(235,235,235);
+  --color-button-hover:rgb(235,235,235)
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

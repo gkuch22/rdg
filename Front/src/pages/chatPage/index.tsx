@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send, Paperclip, FileText, Image, X, Check, Clock } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { Link } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -192,7 +193,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
       case 'delivered':
         return <div className="flex"><Check className="w-3 h-3 text-muted-foreground" /><Check className="w-3 h-3 text-muted-foreground -ml-1" /></div>;
       case 'read':
-        return <div className="flex text-[rgb(40,32,32)]"><Check className="w-3 h-3" /><Check className="w-3 h-3 -ml-1" /></div>;
+        return <div className="flex text-main"><Check className="w-3 h-3" /><Check className="w-3 h-3 -ml-1" /></div>;
       default:
         return null;
     }
@@ -214,12 +215,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
   );
 
   return (
-    <div className={`${className}`} style={{ backgroundColor: 'hsl(var(--chat-background))' }}>
+    <div className={`w-full ${className}`} style={{ backgroundColor: 'hsl(var(--chat-background))' }}>
       
       {/* Header */}
-      <div className="sticky top-0 z-10 border-b border-border px-6 py-4 bg-background border-b-[rgb(235,235,235)]">
-        <div className="flex items-center max-sm:justify-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium">
+      <div className="fixed w-full max-w-[1200px] top-0 right-1/2 translate-x-1/2 z-10 border-b border-border px-6 py-4 bg-background">
+        <Link to={"/"} className="flex group items-center max-sm:justify-center gap-3">
+          <div className="w-10 h-10 group-hover:rotate-360 duration-300 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium">
             <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#000000">
               <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
               <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
@@ -237,13 +238,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
             </svg>
           </div>
           <div>
-            <h1 className="font-medium text-xl text-foreground">Guidee</h1>
+            <h1 className="font-medium text-2xl luckiest-guy-regular text-main group-hover:tracking-widest duration-300">Guidee</h1>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Messages */}
-      <div className="sm:px-6 py-4 space-y-4 pb-32 mt-10 min-h-screen">
+      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-32 mt-[73px] min-h-screen w-full">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -251,50 +252,42 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
               message.sender === 'user' ? 'flex-row-reverse' : ''
             }`}
           >
-            {/* Avatar */}
-             {/* <div 
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 ${
-                message.sender === 'user' ? '' : 'bg-muted text-muted-foreground'
-              }`}
-              style={message.sender === 'user' ? {
-                backgroundColor: 'rgb(220,220,220)',
-                color: 'hsl(var(--chat-user-text))'
-              } : {}}
-            >
-              {message.sender === 'user' ? 'You' : 'AI'}
-            </div> */}
+           
 
             {/* Message content */}
             <div className={`max-w-xs lg:max-w-md ${message.sender === 'user' ? 'text-right' : ''}`}>
               
               {/* Attachments */}
               {message.attachments && message.attachments.length > 0 && (
-                <div className="mb-2 space-y-2">
-                  {message.attachments.map((attachment) => (
-                    <div
-                      key={attachment.id}
-                      className={`p-3 rounded-[10px] border border-border bg-background flex items-center gap-3 ${
-                        message.sender === 'user' ? 'ml-auto' : ''
-                      }`}
-                    >
-                      {attachment.type === 'image' ? (
-                        <Image className="w-4 h-4 text-muted-foreground" />
-                      ) : (
-                        <FileText className="w-4 h-4 text-muted-foreground" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{attachment.name}</p>
-                        <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+  <div className="mb-2 space-y-2">
+    {message.attachments.map((attachment) => (
+      <a 
+        key={attachment.id} 
+        href={attachment.url} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className={`p-3 rounded-[10px] border border-border bg-background flex items-center gap-3 ${
+          message.sender === 'user' ? 'ml-auto' : ''
+        } hover:bg-accent hover:cursor-pointer transition-colors`}
+      >
+        {attachment.type === 'image' ? (
+          <Image className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <FileText className="w-4 h-4 text-muted-foreground" />
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{attachment.name}</p>
+          <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
+        </div>
+      </a>
+    ))}
+  </div>
+)}
 
               {/* Text message */}
               {message.content && (
                 <div
-                  className={`p-3 flex justify-center rounded-[10px] ${message.sender === 'user' ? "bg-[rgb(40,32,32)] text-white" : "bg-[rgb(235,235,235)]" }`}
+                  className={`p-3 min-w-[57px] flex justify-center rounded-[10px] ${message.sender === 'user' ? "bg-main text-white" : "bg-other" }`}
                 
                 >
                   <div>
@@ -319,31 +312,37 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
       </div>
 
       {/* Input area */}
-      <div className="fixed max-w-[1192px] m-auto bottom-0 left-0 right-0 z-20 border-t border-border bg-background px-6 py-4">
+      <div className="fixed max-w-[1200px] m-auto bottom-0 left-0 right-0 z-20 border-t border-border bg-background px-6 py-4">
         {/* Attachments preview */}
         {attachments.length > 0 && (
-          <div className="mb-3 flex flex-wrap gap-2">
-            {attachments.map((attachment) => (
-              <div
-                key={attachment.id}
-                className="flex items-center gap-2 bg-muted p-2 rounded-lg"
-              >
-                {attachment.type === 'image' ? (
-                  <Image className="w-4 h-4 text-muted-foreground" />
-                ) : (
-                  <FileText className="w-4 h-4 text-muted-foreground" />
-                )}
-                <span className="text-sm truncate max-w-32">{attachment.name}</span>
-                <button
-                  onClick={() => removeAttachment(attachment.id)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-          </div>
+  <div className="mb-3 flex flex-wrap gap-2">
+    {attachments.map((attachment) => (
+      <a
+        key={attachment.id}
+        href={URL.createObjectURL(attachment.file)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 bg-muted p-2 rounded-lg hover:bg-accent hover:cursor-pointer transition-colors"
+      >
+        {attachment.type === 'image' ? (
+          <Image className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <FileText className="w-4 h-4 text-muted-foreground" />
         )}
+        <span className="text-sm truncate max-w-32">{attachment.name}</span>
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            removeAttachment(attachment.id);
+          }}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <X className="w-4 h-4 hover:cursor-pointer" />
+        </button>
+      </a>
+    ))}
+  </div>
+)}
         
         <form onSubmit={handleSubmit} className="flex max-sm:flex-col items-center gap-2">
           <div className="w-full flex relative">
@@ -358,18 +357,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
                scrollbarWidth: "thin",
                 scrollbarColor: "rgba(156, 163, 175) transparent",
               }}
-              // style={{
-              //   minHeight: '44px',
-              //   maxHeight: '120px',
-              //   backgroundColor: 'hsl(var(--chat-input-background))',
-              //   borderColor: 'hsl(var(--chat-input-border))'
-              // }}
-              // onFocus={(e) => {
-              //   e.target.style.borderColor = 'hsl(var(--chat-input-focus))';
-              // }}
-              // onBlur={(e) => {
-              //   e.target.style.borderColor = 'hsl(var(--chat-input-border))';
-              // }}
             />
             
           
@@ -388,7 +375,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
               <Button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex h-11 w-11 rounded-[10px] group text-[rgb(40,32,32)] justify-center bg-[rgb(235,235,235)] items-center hover:cursor-pointer hover:bg-[rgb(210,210,210)] transition-colors"
+              className="flex h-11 w-11 rounded-[10px] group text-main justify-center bg-other items-center hover:cursor-pointer hover:bg-[rgb(210,210,210)] transition-colors"
             >
               <Paperclip className="w-5 h-5 group-hover:scale-120 duration-200" />
             </Button>

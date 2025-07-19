@@ -1,12 +1,16 @@
+import { Route, Routes } from 'react-router-dom'
 import './App.css'
-import ChatInterface from './pages'
+import HomePage from './pages/homePage'
+import ChatPage from './pages/chatPage'
+
 
 function App() {
 
   return (
-   
-      <ChatInterface/>
-
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/chat" element={<ChatPage />} />
+    </Routes>
   )
 }
 
