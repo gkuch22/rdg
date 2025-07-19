@@ -256,8 +256,7 @@ const scrollToBottom = () => {
       </div>
 
       {/* Messages */}
-      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[200px] pt-[90px] w-full"
-      >
+      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[200px] pt-[90px] min-h-screen w-full">
         {messages.map((message) => (
           <div
             key={message.id}
