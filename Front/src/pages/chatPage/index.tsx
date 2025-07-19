@@ -49,10 +49,29 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
     type: 'image' | 'pdf';
     file: File;
   }>>([]);
+
   
+    const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Handle viewport changes for mobile keyboard
+  useEffect(() => {
+    const handleViewportChange = () => {
+      if (window.visualViewport) {
+        setViewportHeight(window.visualViewport.height);
+      }
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleViewportChange);
+      };
+    }
+  }, []);
 
 const scrollToBottom = () => {
   setTimeout(() => {
@@ -64,36 +83,7 @@ const scrollToBottom = () => {
 };
 
 
-// New state for tracking keyboard visibility
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-   // Handle viewport changes for mobile keyboard
-  useEffect(() => {
-    const handleViewportChange = () => {
-      if (window.visualViewport) {
-        const viewport = window.visualViewport;
-        const isKeyboardOpen = viewport.height < window.innerHeight * 0.75;
-        setKeyboardVisible(isKeyboardOpen);
-        
-        if (isKeyboardOpen && textareaRef.current) {
-          // Small delay to ensure the keyboard is fully open
-          setTimeout(() => {
-            textareaRef.current?.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'nearest' 
-            });
-          }, 100);
-        }
-      }
-    };
-
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', handleViewportChange);
-      return () => {
-        window.visualViewport?.removeEventListener('resize', handleViewportChange);
-      };
-    }
-  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -333,94 +323,93 @@ const scrollToBottom = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input area */}
- <div 
-        className={`max-w-[1200px] m-auto border-t border-border bg-background px-6 py-4 transition-all duration-200 ${
-          keyboardVisible 
-            ? 'fixed bottom-0 left-0 right-0 z-20' 
-            : 'fixed bottom-0 left-0 right-0 z-20'
-        }`}
+      {/* Input area - Fixed above keyboard */}
+      <div 
+        className="max-w-[1200px] m-auto border-t border-border bg-background px-6 py-4 fixed left-0 right-0 z-20"
         style={{
-          transform: keyboardVisible ? 'translateY(0)' : 'translateY(0)'
+          bottom: `${window.innerHeight - viewportHeight}px`
         }}
-      >        {/* Attachments preview */}
-        {attachments.length > 0 && (
-  <div className="mb-3 flex flex-wrap gap-2">
-    {attachments.map((attachment) => (
-      <a
-        key={attachment.id}
-        href={URL.createObjectURL(attachment.file)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-2 bg-muted p-2 rounded-lg hover:bg-accent hover:cursor-pointer transition-colors"
       >
-        {attachment.type === 'image' ? (
-          <Image className="w-4 h-4 text-muted-foreground" />
-        ) : (
-          <FileText className="w-4 h-4 text-muted-foreground" />
+        {/* Attachments preview */}
+        {attachments.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {attachments.map((attachment) => (
+              <a
+                key={attachment.id}
+                href={URL.createObjectURL(attachment.file)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-muted p-2 rounded-lg hover:bg-accent hover:cursor-pointer transition-colors"
+              >
+                {attachment.type === 'image' ? (
+                  <Image className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <FileText className="w-4 h-4 text-muted-foreground" />
+                )}
+                <span className="text-sm truncate max-w-32">{attachment.name}</span>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    removeAttachment(attachment.id);
+                  }}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4 hover:cursor-pointer" />
+                </button>
+              </a>
+            ))}
+          </div>
         )}
-        <span className="text-sm truncate max-w-32">{attachment.name}</span>
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            removeAttachment(attachment.id);
-          }}
-          className="text-muted-foreground hover:text-foreground"
-        >
-          <X className="w-4 h-4 hover:cursor-pointer" />
-        </button>
-      </a>
-    ))}
-  </div>
-)}
         
-        <form onSubmit={handleSubmit} className="flex max-sm:flex-col items-center gap-2">
+        <div onSubmit={handleSubmit} className="flex max-sm:flex-col items-center gap-2">
           <div className="w-full flex relative">
             <Textarea
               ref={textareaRef}
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={() => {
+                // Scroll to bottom when focused to ensure visibility
+                setTimeout(() => scrollToBottom(), 100);
+              }}
               placeholder="Type a message..."
               className="w-full sm:h-24 resize-none h-fit rounded-[6px] px-4 py-3 pr-12 text-sm focus:outline-none transition-colors border-[rgb(200,200,200)] border-1"
               style={{
-               scrollbarWidth: "thin",
+                scrollbarWidth: "thin",
                 scrollbarColor: "rgba(156, 163, 175) transparent",
               }}
             />
-            
-          
-          
           </div>
-<div className='flex max-sm:w-full justify-start sm:flex-col gap-2'>
 
-    <Button
-            type="submit"
-            className="h-11 w-11 rounded-[10px] group hover:cursor-pointer"
-            disabled={!inputValue.trim() && attachments.length === 0}
-          >
-            <Send className="w-5 h-5 group-hover:scale-120 duration-200" />
-          </Button>
-          <div>
-              <Button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex h-11 w-11 rounded-[10px] group text-main justify-center bg-other items-center hover:cursor-pointer hover:bg-[rgb(210,210,210)] transition-colors"
+          <div className='flex max-sm:w-full justify-start sm:flex-col gap-2'>
+            <Button
+              type="submit"
+              className="h-11 w-11 rounded-[10px] group hover:cursor-pointer"
+              disabled={!inputValue.trim() && attachments.length === 0}
             >
-              <Paperclip className="w-5 h-5 group-hover:scale-120 duration-200" />
+              <Send className="w-5 h-5 group-hover:scale-120 duration-200" />
             </Button>
             
-            <input
-              ref={fileInputRef}
-              type="file"
-              multiple
-              accept="image/*,.pdf"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
+            <div>
+              <Button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex h-11 w-11 rounded-[10px] group text-main justify-center bg-other items-center hover:cursor-pointer hover:bg-[rgb(210,210,210)] transition-colors"
+              >
+                <Paperclip className="w-5 h-5 group-hover:scale-120 duration-200" />
+              </Button>
+              
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,.pdf"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+            </div>
           </div>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );
