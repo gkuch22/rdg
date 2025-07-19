@@ -256,7 +256,13 @@ const scrollToBottom = () => {
       </div>
 
       {/* Messages */}
-      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[200px] pt-[90px] min-h-screen w-full">
+      <div className={`px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 sm:pb-[200px] pt-[90px] w-full h-[${viewportHeight - 90 - 150}px] max-sm:overflow-y-auto sm:min-h-screen`}
+      // style={{
+      //     height: `${viewportHeight - 90 - 150}px`, // Fixed height based on available viewport
+      //     overflowY: 'auto',
+      //     paddingBottom: '20px'
+      //   }}
+      >
         {messages.map((message) => (
           <div
             key={message.id}
