@@ -35,20 +35,6 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
       timestamp: new Date(Date.now() - 60000),
       status: 'read'
     },
-    // {
-    //   id: '2',
-    //   content: 'I need help with analyzing this document.',
-    //   sender: 'user',
-    //   timestamp: new Date(Date.now() - 30000),
-    //   status: 'read'
-    // },
-    // {
-    //   id: '3',
-    //   content: 'I\'d be happy to help you analyze your document. Please upload the file and I\'ll take a look at it.',
-    //   sender: 'bot',
-    //   timestamp: new Date(Date.now() - 15000),
-    //   status: 'read'
-    // }
   ]);
 
 
@@ -76,7 +62,38 @@ const scrollToBottom = () => {
     });
   }, 0);
 };
-  
+
+
+// New state for tracking keyboard visibility
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+   // Handle viewport changes for mobile keyboard
+  useEffect(() => {
+    const handleViewportChange = () => {
+      if (window.visualViewport) {
+        const viewport = window.visualViewport;
+        const isKeyboardOpen = viewport.height < window.innerHeight * 0.75;
+        setKeyboardVisible(isKeyboardOpen);
+        
+        if (isKeyboardOpen && textareaRef.current) {
+          // Small delay to ensure the keyboard is fully open
+          setTimeout(() => {
+            textareaRef.current?.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'nearest' 
+            });
+          }, 100);
+        }
+      }
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleViewportChange);
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleViewportChange);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -85,10 +102,10 @@ const scrollToBottom = () => {
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', { 
       hour: '2-digit', 
-      minute: '2-digit',
+      minute: '2-digit', 
       hour12: false 
-    });
-  };
+    }); 
+  }; 
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
@@ -220,7 +237,7 @@ const scrollToBottom = () => {
   );
 
   return (
-    <div className={`w-full ${className}`} style={{ backgroundColor: 'hsl(var(--chat-background))' }}>
+    <div className={`w-full ${className}`} style={{ backgroundColor: 'none' }}>
       
       {/* Header */}
       <div className="fixed w-full max-w-[1200px] top-0 right-1/2 translate-x-1/2 z-10 border-b border-border px-6 py-4 bg-background">
@@ -249,7 +266,7 @@ const scrollToBottom = () => {
       </div>
 
       {/* Messages */}
-      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[200px] pt-[80px] min-h-screen w-full">
+      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[200px] pt-[90px] min-h-screen w-full">
         {messages.map((message) => (
           <div
             key={message.id}
@@ -317,8 +334,16 @@ const scrollToBottom = () => {
       </div>
 
       {/* Input area */}
-      <div className="fixed max-w-[1200px] m-auto bottom-0 left-0 right-0 z-20 border-t border-border bg-background px-6 py-4">
-        {/* Attachments preview */}
+ <div 
+        className={`max-w-[1200px] m-auto border-t border-border bg-background px-6 py-4 transition-all duration-200 ${
+          keyboardVisible 
+            ? 'fixed bottom-0 left-0 right-0 z-20' 
+            : 'fixed bottom-0 left-0 right-0 z-20'
+        }`}
+        style={{
+          transform: keyboardVisible ? 'translateY(0)' : 'translateY(0)'
+        }}
+      >        {/* Attachments preview */}
         {attachments.length > 0 && (
   <div className="mb-3 flex flex-wrap gap-2">
     {attachments.map((attachment) => (
