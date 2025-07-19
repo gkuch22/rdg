@@ -51,7 +51,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
   }>>([]);
 
   
-    const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+    // const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -60,19 +61,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
  // Replace your current viewport height useEffect with this:
 useEffect(() => {
   const handleResize = () => {
-    // Use window.innerHeight instead of visualViewport for more stability
-    setViewportHeight(window.innerHeight);
+    const newKeyboardHeight = Math.max(0, window.innerHeight - document.documentElement.clientHeight);
+    setKeyboardHeight(newKeyboardHeight);
   };
 
-  // Add both resize and orientationchange listeners
   window.addEventListener('resize', handleResize);
-  window.addEventListener('orientationchange', handleResize);
-
-  return () => {
-    window.removeEventListener('resize', handleResize);
-    window.removeEventListener('orientationchange', handleResize);
-  };
+  return () => window.removeEventListener('resize', handleResize);
 }, []);
+
 
 const scrollToBottom = () => {
   setTimeout(() => {
@@ -257,13 +253,12 @@ const scrollToBottom = () => {
       </div>
 
       {/* Messages */}
-      <div className={`px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[150px] sm:pb-[200px] pt-[90px] w-full  max-sm:overflow-y-auto sm:min-h-screen`}
-      // style={{
-      //     height: `${viewportHeight - 90 - 150}px`, // Fixed height based on available viewport
-      //     overflowY: 'auto',
-      //     paddingBottom: '20px'
-      //   }}
-      >
+      <div 
+  className={`px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[150px] sm:pb-[200px] pt-[90px] w-full max-sm:overflow-y-auto sm:min-h-screen`}
+  style={{
+    paddingBottom: `calc(150px + ${keyboardHeight}px)`
+  }}
+>
         {messages.map((message) => (
           <div
             key={message.id}
@@ -333,7 +328,11 @@ const scrollToBottom = () => {
       
       {/* Replace your current input area div with this: */}
 <div 
-  className="max-w-[1200px] m-auto border-t border-border bg-background px-6 py-4 fixed left-0 right-0 bottom-0 z-20"
+  className="max-w-[1200px] m-auto border-t border-border bg-background px-6 py-4 fixed left-0 right-0 z-20"
+  style={{
+    bottom: `${keyboardHeight}px`,
+    transition: 'bottom 0.2s ease-out'
+  }}
 >
         {/* Attachments preview */}
         {attachments.length > 0 && (
