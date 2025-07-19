@@ -53,6 +53,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
   
     // const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
 const [keyboardHeight, setKeyboardHeight] = useState(0);
+const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -63,12 +64,28 @@ useEffect(() => {
   const handleResize = () => {
     const newKeyboardHeight = Math.max(0, window.innerHeight - document.documentElement.clientHeight);
     setKeyboardHeight(newKeyboardHeight);
+    setIsKeyboardVisible(newKeyboardHeight > 0);
   };
 
   window.addEventListener('resize', handleResize);
   return () => window.removeEventListener('resize', handleResize);
 }, []);
 
+useEffect(() => {
+  const messagesContainer = messagesEndRef.current?.parentElement;
+  if (!messagesContainer) return;
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (isKeyboardVisible) {
+      e.preventDefault();
+    }
+  };
+
+  messagesContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+  return () => {
+    messagesContainer.removeEventListener('touchmove', handleTouchMove);
+  };
+}, [isKeyboardVisible]);
 
 const scrollToBottom = () => {
   setTimeout(() => {
@@ -252,11 +269,18 @@ const scrollToBottom = () => {
         </Link>
       </div>
 
-      {/* Messages */}
-      <div 
+  // 3. Modify your messages container with touch-action manipulation
+<div 
   className={`px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[150px] sm:pb-[200px] pt-[90px] w-full max-sm:overflow-y-auto sm:min-h-screen`}
   style={{
-    paddingBottom: `calc(150px + ${keyboardHeight}px)`
+    paddingBottom: `calc(150px + ${keyboardHeight}px)`,
+    touchAction: isKeyboardVisible ? 'none' : 'auto',
+    overscrollBehavior: 'contain'
+  }}
+  ref={(el) => {
+    if (el) {
+      el.style.touchAction = isKeyboardVisible ? 'none' : 'auto';
+    }
   }}
 >
         {messages.map((message) => (
