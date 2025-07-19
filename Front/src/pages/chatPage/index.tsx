@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send, Paperclip, FileText, Image, X, Check, Clock } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-
+import { Link } from 'react-router-dom';
 
 interface Message {
   id: string;
@@ -23,7 +23,10 @@ interface ChatInterfaceProps {
   className?: string;
 }
 
+
+
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -34,6 +37,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
     },
   ]);
 
+
+
+
+  
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [attachments, setAttachments] = useState<Array<{
@@ -42,10 +49,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
     type: 'image' | 'pdf';
     file: File;
   }>>([]);
+
   
-  // New state for tracking keyboard visibility and viewport height
-  const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
-  
+    const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -66,14 +73,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
     }
   }, []);
 
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
-    }, 0);
-  };
+const scrollToBottom = () => {
+  setTimeout(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center' // Changed from default 'start'
+    });
+  }, 0);
+};
+
+
+
 
   useEffect(() => {
     scrollToBottom();
@@ -221,7 +231,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
       
       {/* Header */}
       <div className="fixed w-full max-w-[1200px] top-0 right-1/2 translate-x-1/2 z-10 border-b border-border px-6 py-4 bg-background">
-        <div className="flex w-fit group items-center max-sm:justify-center gap-3">
+        <Link to={"/"} className="flex w-fit group items-center max-sm:justify-center gap-3">
           <div className="w-10 h-10 group-hover:rotate-360 duration-300 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium">
             <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#000000">
               <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
@@ -242,17 +252,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
           <div>
             <h1 className="font-medium text-2xl luckiest-guy-regular text-main group-hover:tracking-widest duration-300">Guidee</h1>
           </div>
-        </div>
+        </Link>
       </div>
 
       {/* Messages */}
-      <div 
-        className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pt-[90px] w-full"
-        style={{
-          height: `${viewportHeight - 90 - 150}px`, // Fixed height based on available viewport
-          overflowY: 'auto',
-          paddingBottom: '20px'
-        }}
+      <div className="px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[200px] pt-[90px] w-full"
       >
         {messages.map((message) => (
           <div
@@ -261,43 +265,46 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
               message.sender === 'user' ? 'flex-row-reverse' : ''
             }`}
           >
+           
+
             {/* Message content */}
             <div className={`max-w-xs flex flex-col lg:max-w-md ${message.sender === 'user' ? 'text-right items-end' : 'items-start'}`}>
               
               {/* Attachments */}
               {message.attachments && message.attachments.length > 0 && (
-                <div className="mb-2 space-y-2 w-full max-w-fit">
-                  {message.attachments.map((attachment) => (
-                    <a 
-                      key={attachment.id} 
-                      href={attachment.url} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className={`p-3 rounded-[10px] border border-border bg-background flex items-center gap-3 ${
-                        message.sender === 'user' ? 'ml-auto' : ''
-                      } hover:bg-accent hover:cursor-pointer transition-colors`}
-                    >
-                      {attachment.type === 'image' ? (
-                        <Image className="w-4 h-4 text-muted-foreground" />
-                      ) : (
-                        <FileText className="w-4 h-4 text-muted-foreground" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{attachment.name}</p>
-                        <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              )}
+  <div className="mb-2 space-y-2 w-full max-w-fit">
+    {message.attachments.map((attachment) => (
+      <a 
+        key={attachment.id} 
+        href={attachment.url} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className={`p-3 rounded-[10px] border border-border bg-background flex items-center gap-3 ${
+          message.sender === 'user' ? 'ml-auto' : ''
+        } hover:bg-accent hover:cursor-pointer transition-colors`}
+      >
+        {attachment.type === 'image' ? (
+          <Image className="w-4 h-4 text-muted-foreground" />
+        ) : (
+          <FileText className="w-4 h-4 text-muted-foreground" />
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{attachment.name}</p>
+          <p className="text-xs text-muted-foreground">{formatFileSize(attachment.size)}</p>
+        </div>
+      </a>
+    ))}
+  </div>
+)}
 
               {/* Text message */}
               {message.content && (
                 <div
                   className={`p-3 min-w-[57px] w-fit flex justify-center rounded-[10px] ${message.sender === 'user' ? "bg-main text-white" : "bg-other" }`}
+                
                 >
                   <div>
-                    <p className="text-sm text-start whitespace-pre-wrap">{message.content}</p>
+                  <p className="text-sm text-start whitespace-pre-wrap">{message.content}</p>
                   </div>
                 </div>
               )}
@@ -317,11 +324,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input area - Always fixed above keyboard */}
+      {/* Input area - Fixed above keyboard */}
       <div 
         className="max-w-[1200px] m-auto border-t border-border bg-background px-6 py-4 fixed left-0 right-0 z-20"
         style={{
-          bottom: Math.max(0, window.innerHeight - viewportHeight) + 'px'
+          bottom: `${window.innerHeight - viewportHeight}px`
         }}
       >
         {/* Attachments preview */}
