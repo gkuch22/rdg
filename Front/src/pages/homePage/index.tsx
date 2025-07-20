@@ -87,7 +87,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        <p className="text-main">
+        <p className="text-main px-4">
           your personal AI legal assistant. Whether you need contract reviews,
           legal research, or tailored guidance, Lawly simplifies complex legal
           matters with smart, reliable support. Just share your case details,
