@@ -66,28 +66,29 @@ This is a full-stack AI chatbot built to assist users in navigating the **Georgi
 ---
 
 ### 💻 Frontend
+Option 1: Local Development
 
 1. Clone the frontend project:
    ```bash
-   git clone https://github.com/your-username/georgia-law-chatbot-frontend
-   cd georgia-law-chatbot-frontend
+   git clone https://github.com/gkuch22/rdg 
    ```
+   
+2.  Navigate to the frontend directory:
+    ```bash 
+    cd Front
 
-2. Install dependencies:
+3. Install dependencies:
    ```bash
    npm install
-   ```
 
-3. Create a `.env` file:
-   ```bash
-   VITE_BACKEND_URL=https://abc123.ngrok-free.app
-   ```
-
-4. Start the frontend dev server:
+4. Start the development server: 
    ```bash
    npm run dev
    ```
+Option 2 (might not be ready): Live Demo
+🌐 Try the live demo: https://rdgnew.vercel.app/
 
+The live demo is hosted on Vercel and ready to use. Simply access the URL to interact with the Georgian Law AI Assistant.
 > The chatbot will now communicate with the backend running on Colab via the ngrok tunnel.
 
 ### ⚙️ Backend (Google Colab)
