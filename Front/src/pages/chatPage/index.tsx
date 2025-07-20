@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Send, Paperclip, FileText, Image, X, Check, Clock } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Link } from 'react-router-dom';
+import { sendMessageToBackend } from '@/API';
 
 interface Message {
   id: string;
@@ -23,33 +24,8 @@ interface ChatInterfaceProps {
   className?: string;
 }
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-// Add this function before your ChatInterface component
-const sendMessageToAPI = async (question:string) => {
-  try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        question: question
-      })
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.answer;
-  } catch (error) {
-    console.error('Error sending message to API:', error);
-    throw error;
-  }
-};
 
 
 
@@ -58,7 +34,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      content: 'Hello! How can I help you today?',
+      content: 'სალამი! რით შემიძლია დაგეხმარო?',
       sender: 'bot',
       timestamp: new Date(Date.now() - 60000),
       status: 'read'
@@ -171,7 +147,7 @@ const scrollToBottom = () => {
     setAttachments(prev => prev.filter(att => att.id !== id));
   };
 
-  // Replace your handleSubmit function with this updated version:
+ // Replace your handleSubmit function with this updated version:
 const handleSubmit = async (e:React.FormEvent) => {
   e.preventDefault();
   
@@ -180,9 +156,9 @@ const handleSubmit = async (e:React.FormEvent) => {
   const newMessage: Message = {
     id: Date.now().toString(),
     content: inputValue.trim(),
-    sender: 'user',
+    sender: 'user' as const,
     timestamp: new Date(),
-    status: 'sending',
+    status: 'sending' as const,
     attachments: attachments.map(att => ({
       id: att.id,
       name: att.name,
@@ -211,19 +187,19 @@ const handleSubmit = async (e:React.FormEvent) => {
   }, 1000);
 
   // Show typing indicator
-  setTimeout(() => {
-    setIsTyping(true);
-  }, 1500);
+  // setTimeout(() => {
+  //   setIsTyping(true);
+  // }, 1500);
 
   try {
     // Send message to API
-    const botAnswer = await sendMessageToAPI(userQuestion);
+    const botAnswer = await sendMessageToBackend(userQuestion);
     
     setIsTyping(false);
     const botResponse: Message = {
       id: Date.now().toString() + '_bot',
       content: botAnswer,
-      sender: 'bot',
+      sender: 'bot' as const,
       timestamp: new Date(),
       status: 'read'
     };
@@ -239,7 +215,7 @@ const handleSubmit = async (e:React.FormEvent) => {
     const errorResponse: Message = {
       id: Date.now().toString() + '_bot_error',
       content: 'Sorry, I encountered an error while processing your message. Please try again.',
-      sender: 'bot',
+      sender: 'bot' as const,
       timestamp: new Date(),
       status: 'read'
     };
