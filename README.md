@@ -90,6 +90,32 @@ This is a full-stack AI chatbot built to assist users in navigating the **Georgi
 
 > The chatbot will now communicate with the backend running on Colab via the ngrok tunnel.
 
+### ⚙️ Backend (Google Colab)
+Open the notebook law_hackathon.ipynb in Google Colab.
+
+Upload these required files into Colab:
+
+criminal_code.index
+
+criminal_code_metadata.json
+
+Install required dependencies:
+!pip install fastapi uvicorn[standard] nest_asyncio pyngrok langchain-google-genai faiss-cpu sentence-transformers pdfplumber
+
+Insert your ngrok token:
+from pyngrok import ngrok
+ngrok.set_auth_token("308gaoKG75dbPulMWNjjb5TUOkx_7fSEL1oD9szXk8bgvGiY4")
+
+Once the code runs, it will print an ngrok public URL. Copy this link. For example:
+
+🎉 Public URL: https://498ed88d5417.ngrok-free.app
+
+Set this URL in the backend code so the frontend can connect:
+COLAB_API_URL = "https://498ed88d5417.ngrok-free.app"
+
+Start the FastAPI server in Colab:
+
+uvicorn main:app --reload --port 8000
 ---
 
 ## 🧠 Example Usage
