@@ -10,7 +10,7 @@ interface Message {
   content: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  status?: 'sending' | 'sent' | 'delivered' | 'read';
+  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
   attachments?: Array<{
     id: string;
     name: string;
@@ -55,7 +55,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
   }>>([]);
 
   
-    // const [viewportHeight, setViewportHeight] = useState(window.innerHeight);
+    
 const [keyboardHeight, setKeyboardHeight] = useState(0);
 const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
@@ -63,7 +63,7 @@ const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
- // Replace your current viewport height useEffect with this:
+ 
 useEffect(() => {
   const handleResize = () => {
     const newKeyboardHeight = Math.max(0, window.innerHeight - document.documentElement.clientHeight);
@@ -147,8 +147,7 @@ const scrollToBottom = () => {
     setAttachments(prev => prev.filter(att => att.id !== id));
   };
 
- // Replace your handleSubmit function with this updated version:
-const handleSubmit = async (e:React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   
   if (!inputValue.trim() && attachments.length === 0) return;
@@ -156,9 +155,9 @@ const handleSubmit = async (e:React.FormEvent) => {
   const newMessage: Message = {
     id: Date.now().toString(),
     content: inputValue.trim(),
-    sender: 'user' as const,
+    sender: 'user',
     timestamp: new Date(),
-    status: 'sending' as const,
+    status: 'sending',
     attachments: attachments.map(att => ({
       id: att.id,
       name: att.name,
@@ -168,63 +167,65 @@ const handleSubmit = async (e:React.FormEvent) => {
     }))
   };
 
+  // Initial optimistic update (might delete this later)
   setMessages(prev => [...prev, newMessage]);
   const userQuestion = inputValue.trim();
   setInputValue('');
   setAttachments([]);
 
-  // Simulate message status updates
-  setTimeout(() => {
+  
+
+  try {
+
     setMessages(prev => prev.map(msg => 
       msg.id === newMessage.id ? { ...msg, status: 'sent' } : msg
     ));
-  }, 500);
 
-  setTimeout(() => {
-    setMessages(prev => prev.map(msg => 
-      msg.id === newMessage.id ? { ...msg, status: 'delivered' } : msg
-    ));
-  }, 1000);
-
-  // Show typing indicator
-  // setTimeout(() => {
-  //   setIsTyping(true);
-  // }, 1500);
-
-  try {
-    // Send message to API
+    setIsTyping(true);
+    
     const botAnswer = await sendMessageToBackend(userQuestion);
     
     setIsTyping(false);
+
+      // lets mark user message as "delivered" when we get the response (I might get rid of this too)
+    setMessages(prev => prev.map(msg => 
+      msg.id === newMessage.id ? { ...msg, status: 'delivered' } : msg
+    ));
+
     const botResponse: Message = {
       id: Date.now().toString() + '_bot',
       content: botAnswer,
-      sender: 'bot' as const,
+      sender: 'bot',
       timestamp: new Date(),
       status: 'read'
     };
-    setMessages(prev => [...prev, botResponse]);
     
-    // Mark user message as read
-    setMessages(prev => prev.map(msg => 
-      msg.id === newMessage.id ? { ...msg, status: 'read' } : msg
-    ));
+    // Add bot response and mark user message as read (I'll keep it for now)
+    setMessages(prev => [
+      ...prev.map(msg => 
+        msg.id === newMessage.id ? { ...msg, status: 'read' as Message['status'] } : msg
+      ),
+      botResponse
+    ]);
+    
   } catch (error) {
-    console.log(error)
+    console.error(error);
     setIsTyping(false);
+    
     const errorResponse: Message = {
       id: Date.now().toString() + '_bot_error',
-      content: 'Sorry, I encountered an error while processing your message. Please try again.',
-      sender: 'bot' as const,
+      content: 'Sorry, I encountered an error. Please try again.',
+      sender: 'bot',
       timestamp: new Date(),
       status: 'read'
     };
-    setMessages(prev => [...prev, errorResponse]);
     
-    // Mark user message as read even on error
-    setMessages(prev => prev.map(msg => 
-      msg.id === newMessage.id ? { ...msg, status: 'read' } : msg
-    ));
+    setMessages(prev => [
+      ...prev.map(msg => 
+        msg.id === newMessage.id ? { ...msg, status: 'failed' as Message['status'] } : msg
+      ),
+      errorResponse
+    ]);
   }
 };
 
@@ -271,30 +272,26 @@ const handleSubmit = async (e:React.FormEvent) => {
       {/* Header */}
       <div className="fixed w-full max-w-[1200px] top-0 right-1/2 translate-x-1/2 z-10 border-b border-border px-6 py-4 bg-background">
         <Link to={"/"} className="flex w-fit group items-center max-sm:justify-center gap-3">
-          <div className="w-10 h-10 group-hover:rotate-360 duration-300 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium">
-            <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="#000000">
-              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-              <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
-              <g id="SVGRepo_iconCarrier">
-                <path style={{ fill: "#AEADB3" }} d="M425.347,468.992c-2.692,0-5.415-0.544-8.001-1.675c-17.573-7.7-81.137-32.815-161.348-32.815 s-143.772,25.117-161.344,32.814c-8.728,3.823-19.019,0.927-24.47-6.881c-5.453-7.809-4.623-18.466,1.968-25.341 C186.457,315.937,237.211,92.289,237.211,27.393h37.579c0,64.896,50.753,288.544,165.057,407.7 c6.594,6.876,7.422,17.533,1.969,25.342C437.978,465.931,431.746,468.992,425.347,468.992z M256,396.922 c45.128,0,85.512,7.323,116.679,15.573c-43.826-61.302-73.867-132.096-92.604-185.955c-9.769-28.08-17.756-55.189-24.076-80.274 c-6.32,25.085-14.306,52.194-24.076,80.274c-18.737,53.859-48.775,124.654-92.604,185.955 C170.489,404.247,210.872,396.922,256,396.922z"></path>
-                <path style={{ fill: "#56545A" }} d="M439.847,435.093C325.543,315.937,274.79,92.289,274.79,27.393H256v118.872l0,0 c6.32,25.085,14.306,52.194,24.076,80.274c18.737,53.859,48.777,124.654,92.604,185.955c-31.168-8.25-71.551-15.573-116.679-15.573 l0,0V434.5l0,0c80.209,0,143.773,25.117,161.348,32.815c2.584,1.131,5.307,1.675,8.001,1.675c6.397,0,12.63-3.061,16.469-8.557 C447.267,452.626,446.439,441.969,439.847,435.093z"></path>
-                <rect x="237.213" y="27.393" style={{ fill: "#88888F" }} width="37.579" height="457.214"></rect>
-                <path style={{ fill: "#FF4F19" }} d="M510.695,132.83c-5.431-20.27-26.265-32.299-46.536-26.868l-26.215,7.024l-7.025-26.215 c-5.431-20.27-26.267-32.299-46.536-26.868c-20.27,5.431-32.299,26.267-26.868,46.536l26.693,99.619l99.619-26.693 C504.099,173.935,516.126,153.099,510.695,132.83z"></path>
-                <g>
-                  <path style={{ fill: "#AF2E08" }} d="M510.696,132.83c-5.431-20.27-26.267-32.299-46.536-26.868l-26.215,7.025l-53.735,93.071 l99.619-26.693C504.099,173.935,516.128,153.099,510.696,132.83z"></path>
-                  <path style={{ fill: "#AF2E08" }} d="M127.617,59.904c-20.27-5.431-41.104,6.598-46.536,26.868l-7.025,26.215l8.478,54.1l45.258,38.971 l26.693-99.619C159.916,86.169,147.887,65.336,127.617,59.904z"></path>
-                </g>
-                <path style={{ fill: "#FF4F19" }} d="M1.304,132.83c5.431-20.27,26.267-32.299,46.536-26.868l26.215,7.025l53.735,93.071l-99.618-26.693 C7.902,173.935-4.127,153.099,1.304,132.83z"></path>
-              </g>
-            </svg>
+          <div className="w-11 h-11 group-hover:rotate-360 duration-300 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-medium">
+           <svg 
+    className="w-full h-full p-2" 
+    viewBox="0 0 512 512" 
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M102.4,469.333c0,4.71,3.814,8.533,8.533,8.533h290.133c4.719,0,8.533-3.823,8.533-8.533s-3.814-8.533-8.533-8.533 H110.933C106.214,460.8,102.4,464.623,102.4,469.333z"/>
+    <path d="M262.809,263.95l-3.729,19.635l18.85-9.131c2.355-1.143,5.086-1.143,7.441,0l18.859,9.131l-3.746-19.635 c-0.452-2.355,0.12-4.796,1.562-6.716l13.747-18.321l-17.323-0.026c-3.251-0.009-6.212-1.843-7.646-4.762l-9.173-18.577 l-9.173,18.577c-1.434,2.918-4.395,4.753-7.646,4.762l-17.331,0.026l13.747,18.321 C262.689,259.154,263.261,261.594,262.809,263.95z"/>
+    <path d="M218.45,61.442l20.48,15.36v-76.8h-51.2v76.8l20.489-15.36C211.248,59.163,215.421,59.163,218.45,61.442z"/>
+    <path d="M443.733,0H256v93.867c0,3.234-1.826,6.187-4.719,7.637c-1.203,0.597-2.517,0.896-3.814,0.896 c-1.809,0-3.618-0.58-5.12-1.707l-29.013-21.76l-29.013,21.76c-2.577,1.946-6.042,2.253-8.934,0.811 c-2.893-1.451-4.719-4.403-4.719-7.637V0h-51.2H102.4C78.874,0,59.733,19.14,59.733,42.667v426.667 C59.733,492.86,78.874,512,102.4,512h341.333c4.719,0,8.533-3.823,8.533-8.533V435.2V8.533C452.267,3.823,448.452,0,443.733,0z M181.555,176.555c-2.756-2.884-3.14-7.305-0.922-10.624l17.067-25.6c1.562-2.33,4.156-3.755,6.955-3.797 c2.62,0,5.444,1.28,7.083,3.567c0.358,0.469,10.496,13.5,35.729,13.5c22.434,0,25.736-10.189,25.856-10.624 c1.126-3.738,5.043-6.468,8.559-6.263c3.806,0.154,7.083,2.637,8.004,6.298c0.247,0.777,3.84,10.59,25.847,10.59 c25.233,0,35.371-13.03,35.789-13.585c1.672-2.202,4.267-3.499,7.091-3.43c2.773,0.085,5.35,1.451,6.886,3.746l17.067,25.6 c2.219,3.319,1.835,7.74-0.922,10.624c-0.444,0.478-11.767,13.039-7.475,32.776c0.145,0.632,0.751,2.594,1.579,5.393 c1.57,5.197,3.917,13.056,6.187,21.316c8.192,29.926-7.398,78.456-40.525,98.611c-0.265,0.162-0.998,0.546-1.297,0.674 l-7.151,3.584c-21.53,9.114-42.069,22.63-42.829,28.066c0,0.128,0,0.247-0.009,0.375c-0.188,4.548-3.934,8.141-8.525,8.141 c-4.719,0-8.533-3.849-8.533-8.559c-0.708-5.376-21.274-18.918-42.325-27.793l-7.731-3.849c-0.213-0.111-1.016-0.521-1.22-0.649 c-33.126-20.147-48.717-68.676-40.525-98.603c2.27-8.26,4.617-16.119,6.187-21.316c0.828-2.799,1.434-4.762,1.604-5.478 C193.399,189.252,181.675,176.683,181.555,176.555z M76.8,42.667c0-14.114,11.486-25.6,25.6-25.6h8.533v409.6H102.4 c-2.714,0-5.342,0.316-7.91,0.802c-0.819,0.154-1.596,0.401-2.398,0.597c-1.732,0.435-3.43,0.947-5.077,1.587 c-0.862,0.333-1.69,0.7-2.526,1.092c-1.545,0.717-3.021,1.527-4.454,2.415c-0.742,0.461-1.485,0.896-2.193,1.399 c-0.333,0.239-0.717,0.418-1.041,0.657V42.667z M435.2,494.933H102.4c-14.114,0-25.6-11.486-25.6-25.6 c0-14.114,11.486-25.6,25.6-25.6h17.067H435.2V494.933z"/>
+    <path d="M230.659,320.066l7.219,3.575c10.709,4.506,31.881,14.438,43.725,26.547c11.87-12.126,33.161-22.11,44.22-26.778 l6.733-3.388c28.604-17.365,38.605-58.684,32.913-79.471c-2.219-8.115-4.531-15.829-6.059-20.932 c-1.058-3.524-1.766-5.939-1.92-6.639c-4.326-19.925,2.594-34.944,7.535-42.59l-8.149-12.228 c-7.74,5.777-21.06,12.501-41.139,12.501c-17.596,0-28.023-5.18-34.133-10.718c-6.118,5.538-16.546,10.718-34.133,10.718 c-20.087,0-33.399-6.724-41.148-12.501l-8.149,12.228c4.941,7.646,11.87,22.656,7.543,42.564c-0.154,0.725-0.862,3.14-1.92,6.665 c-1.527,5.103-3.849,12.817-6.059,20.932C192.045,261.339,202.038,302.658,230.659,320.066z M222.816,226.592 c1.442-2.893,4.395-4.719,7.629-4.727l29.073-0.034l14.481-29.338c2.867-5.828,12.433-5.828,15.3,0l14.481,29.338l29.082,0.034 c3.226,0.008,6.178,1.835,7.62,4.727c1.442,2.884,1.135,6.349-0.811,8.926l-21.717,28.945l6.212,32.606 c0.597,3.166-0.631,6.409-3.191,8.371c-1.519,1.161-3.354,1.758-5.188,1.758c-1.271,0-2.543-0.273-3.721-0.853l-30.413-14.729 l-30.421,14.729c-2.884,1.417-6.349,1.058-8.909-0.905c-2.56-1.963-3.789-5.197-3.191-8.371l6.212-32.606l-21.717-28.945 C221.682,232.94,221.374,229.476,222.816,226.592z"/>
+  </svg>
           </div>
           <div>
-            <h1 className="font-medium text-2xl luckiest-guy-regular text-main group-hover:tracking-widest duration-300">Guidee</h1>
+            <h1 className="font-medium text-2xl luckiest-guy-regular text-main group-hover:tracking-widest duration-300">Samartliko</h1>
           </div>
         </Link>
       </div>
 
-  // 3. Modify your messages container with touch-action manipulation
 <div 
   className={`px-4 sm:px-6 max-w-[1200px] m-auto py-4 space-y-6 pb-[150px] sm:pb-[200px] pt-[90px] w-full max-sm:overflow-y-auto sm:min-h-screen`}
   style={{
@@ -375,7 +372,7 @@ const handleSubmit = async (e:React.FormEvent) => {
       </div>
 
       
-      {/* Replace your current input area div with this: */}
+      {/*input area div*/}
 <div 
   className="max-w-[1200px] m-auto border-t border-border bg-background px-6 py-4 fixed left-0 right-0 z-20"
   style={{
