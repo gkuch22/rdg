@@ -4,7 +4,7 @@ const HomePage = () => {
   return (
     <div className="flex h-screen justify-center items-center">
      <div className="flex absolute bottom-5 right-5 gap-5">
-  {/* GitHub Icon */}
+  
   <a
     target="_blank"
     rel="noopener noreferrer"
@@ -23,7 +23,7 @@ const HomePage = () => {
     </svg>
   </a>
 
-  {/* Second Icon (assuming it's a different link) */}
+ 
   <Link
     to={"/QRcode"}
     className="hover:cursor-pointer hover:scale-110 duration-200"
