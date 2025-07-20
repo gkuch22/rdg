@@ -23,6 +23,34 @@ interface ChatInterfaceProps {
   className?: string;
 }
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
+// Add this function before your ChatInterface component
+const sendMessageToAPI = async (question:string) => {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        question: question
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.answer;
+  } catch (error) {
+    console.error('Error sending message to API:', error);
+    throw error;
+  }
+};
+
 
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ className }) => {
@@ -91,7 +119,7 @@ const scrollToBottom = () => {
   setTimeout(() => {
     messagesEndRef.current?.scrollIntoView({
       behavior: 'smooth',
-      block: 'center' // Changed from default 'start'
+      block: 'center'
     });
   }, 0);
 };
@@ -143,65 +171,86 @@ const scrollToBottom = () => {
     setAttachments(prev => prev.filter(att => att.id !== id));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!inputValue.trim() && attachments.length === 0) return;
+  // Replace your handleSubmit function with this updated version:
+const handleSubmit = async (e:React.FormEvent) => {
+  e.preventDefault();
+  
+  if (!inputValue.trim() && attachments.length === 0) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      content: inputValue.trim(),
-      sender: 'user',
-      timestamp: new Date(),
-      status: 'sending',
-      attachments: attachments.map(att => ({
-        id: att.id,
-        name: att.name,
-        type: att.type,
-        url: URL.createObjectURL(att.file),
-        size: att.file.size
-      }))
-    };
-
-    setMessages(prev => [...prev, newMessage]);
-    setInputValue('');
-    setAttachments([]);
-
-    // Simulate message status updates
-    setTimeout(() => {
-      setMessages(prev => prev.map(msg => 
-        msg.id === newMessage.id ? { ...msg, status: 'sent' } : msg
-      ));
-    }, 500);
-
-    setTimeout(() => {
-      setMessages(prev => prev.map(msg => 
-        msg.id === newMessage.id ? { ...msg, status: 'delivered' } : msg
-      ));
-    }, 1000);
-
-    // Simulate bot typing and response
-    setTimeout(() => {
-      setIsTyping(true);
-    }, 1500);
-
-    setTimeout(() => {
-      setIsTyping(false);
-      const botResponse: Message = {
-        id: Date.now().toString() + '_bot',
-        content: 'I can see your message' + (newMessage.attachments && newMessage.attachments.length > 0 ? ' and attachments' : '') + '. Let me analyze this for you.',
-        sender: 'bot',
-        timestamp: new Date(),
-        status: 'read'
-      };
-      setMessages(prev => [...prev, botResponse]);
-      
-      // Mark user message as read
-      setMessages(prev => prev.map(msg => 
-        msg.id === newMessage.id ? { ...msg, status: 'read' } : msg
-      ));
-    }, 3000);
+  const newMessage: Message = {
+    id: Date.now().toString(),
+    content: inputValue.trim(),
+    sender: 'user',
+    timestamp: new Date(),
+    status: 'sending',
+    attachments: attachments.map(att => ({
+      id: att.id,
+      name: att.name,
+      type: att.type,
+      url: URL.createObjectURL(att.file),
+      size: att.file.size
+    }))
   };
+
+  setMessages(prev => [...prev, newMessage]);
+  const userQuestion = inputValue.trim();
+  setInputValue('');
+  setAttachments([]);
+
+  // Simulate message status updates
+  setTimeout(() => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === newMessage.id ? { ...msg, status: 'sent' } : msg
+    ));
+  }, 500);
+
+  setTimeout(() => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === newMessage.id ? { ...msg, status: 'delivered' } : msg
+    ));
+  }, 1000);
+
+  // Show typing indicator
+  setTimeout(() => {
+    setIsTyping(true);
+  }, 1500);
+
+  try {
+    // Send message to API
+    const botAnswer = await sendMessageToAPI(userQuestion);
+    
+    setIsTyping(false);
+    const botResponse: Message = {
+      id: Date.now().toString() + '_bot',
+      content: botAnswer,
+      sender: 'bot',
+      timestamp: new Date(),
+      status: 'read'
+    };
+    setMessages(prev => [...prev, botResponse]);
+    
+    // Mark user message as read
+    setMessages(prev => prev.map(msg => 
+      msg.id === newMessage.id ? { ...msg, status: 'read' } : msg
+    ));
+  } catch (error) {
+    console.log(error)
+    setIsTyping(false);
+    const errorResponse: Message = {
+      id: Date.now().toString() + '_bot_error',
+      content: 'Sorry, I encountered an error while processing your message. Please try again.',
+      sender: 'bot',
+      timestamp: new Date(),
+      status: 'read'
+    };
+    setMessages(prev => [...prev, errorResponse]);
+    
+    // Mark user message as read even on error
+    setMessages(prev => prev.map(msg => 
+      msg.id === newMessage.id ? { ...msg, status: 'read' } : msg
+    ));
+  }
+};
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
